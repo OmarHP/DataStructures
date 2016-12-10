@@ -29,8 +29,20 @@ class Buffer {
     }
 
     public Response Process(Request request) {
-        // write your code here
-        return new Response(false, -1);
+
+        while (finish_time_.size() > 0 && finish_time_.get(0) <= request.arrival_time)
+            finish_time_.remove(0);
+
+        if (finish_time_.size() < size_) {
+            int nextInit = request.arrival_time;
+            if (finish_time_.size() > 0)
+                nextInit = finish_time_.get(finish_time_.size() - 1);
+            finish_time_.add(nextInit + request.process_time);
+            return new Response(false, nextInit);
+        } else {
+            return new Response(true, -1);
+        }
+
     }
 
     private int size_;
