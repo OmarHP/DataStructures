@@ -29,6 +29,7 @@ public class MergingTables {
             rank = 0;
             parent = this;
         }
+
         Table getParent() {
             // find super parent and compress path
             return parent;
@@ -38,14 +39,36 @@ public class MergingTables {
     int maximumNumberOfRows = -1;
 
     void merge(Table destination, Table source) {
-        Table realDestination = destination.getParent();
-        Table realSource = source.getParent();
+        Table realDestination = find(destination);
+        Table realSource = find(source);
         if (realDestination == realSource) {
             return;
         }
+
         // merge two components here
         // use rank heuristic
         // update maximumNumberOfRows
+        if (realDestination.rank > realSource.rank) {
+            realSource.parent=realDestination;
+            realDestination.numberOfRows+=realSource.numberOfRows;
+            realSource.numberOfRows=0;
+            maximumNumberOfRows=Math.max(maximumNumberOfRows,realDestination.numberOfRows);
+        }else{
+            realDestination.parent=realSource;
+            realSource.numberOfRows+=realDestination.numberOfRows;
+            realDestination.numberOfRows=0;
+            maximumNumberOfRows=Math.max(maximumNumberOfRows,realSource.numberOfRows);
+            if(realSource.rank==realDestination.rank){
+                realSource.rank+=1;
+            }
+        }
+    }
+
+    private Table find(Table table){
+        if(table!=table.parent){
+            table.parent=find(table.parent);
+        }
+        return table.parent;
     }
 
     public void run() {
