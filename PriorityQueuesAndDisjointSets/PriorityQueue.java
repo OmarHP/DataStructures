@@ -1,28 +1,26 @@
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
  * Created by Omar on 22/12/2016.
  */
-public class PriorityQueue<T extends Comparable<T>> {
+public class PriorityQueue<T> {
 
     private List<T> data;
+    private Comparator<T> comparator;
 
-    public static enum Priority {
-        MAX,
-        MIN
-    }
-
-    private Priority priority = Priority.MAX;
 
     public PriorityQueue() {
         data = new ArrayList<T>();
     }
 
-    public PriorityQueue(Priority priority) {
-        data = new ArrayList<T>();
-        this.priority = priority;
+    public PriorityQueue(Comparator<T> comparator){
+        this.comparator=comparator;
+        data=new ArrayList<T>();
     }
+
+
 
     public void insert(T element) {
         data.add(element);
@@ -43,16 +41,17 @@ public class PriorityQueue<T extends Comparable<T>> {
         }
     }
 
-    private boolean comparePriority(T o1, T o2) {
-        if (priority == Priority.MAX) {
-            return o1.compareTo(o2) > 0;
-        } else {
-            return o1.compareTo(o2) < 0;
-        }
+    private boolean compare(T o1, T o2) {
+        if(comparator!=null)
+            return comparator.compare(o1,o2)<0;
+
+        Comparable<T> comparable=(Comparable<T>) o1;
+        return comparable.compareTo((T)o2)<0;
+
     }
 
     private void siftUp(int i) {
-        while (i > 0 && comparePriority(data.get(i), data.get(parent(i)))) {
+        while (i > 0 && compare(data.get(i), data.get(parent(i)))) {
             swap(parent(i), i);
             i = parent(i);
         }
@@ -62,12 +61,12 @@ public class PriorityQueue<T extends Comparable<T>> {
         int maxIndex = i;
 
         int l = leftChild(i);
-        if (l < data.size() && comparePriority(data.get(l), data.get(maxIndex))) {
+        if (l < data.size() && compare(data.get(l), data.get(maxIndex))) {
             maxIndex = l;
         }
 
         int r = rightChild(i);
-        if (r < data.size() && comparePriority(data.get(r), data.get(maxIndex))) {
+        if (r < data.size() && compare(data.get(r), data.get(maxIndex))) {
             maxIndex = r;
         }
 
@@ -103,7 +102,14 @@ public class PriorityQueue<T extends Comparable<T>> {
 
 
     public static void main(String... args) {
-        PriorityQueue<Integer> queue = new PriorityQueue<>(Priority.MIN);
+        Comparator<Integer> comparator=new Comparator<Integer>() {
+            @Override
+            public int compare(Integer o1, Integer o2) {
+                return o1.compareTo(o2)*-1;
+            }
+        };
+
+        PriorityQueue<Integer> queue = new PriorityQueue<>(comparator);
         queue.insert(1);
         queue.insert(10);
         queue.insert(200);
